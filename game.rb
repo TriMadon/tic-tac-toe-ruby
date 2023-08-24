@@ -1,4 +1,8 @@
+require './player'
+
 class Game
+  attr_accessor :p1, :p2
+
   def initialize
     p1_name = ask_p1_name
     p2_name = ask_p2_name
@@ -13,20 +17,21 @@ class Game
 
   def ask_p1_name
     puts 'First player\'s name:'
-    gets.chomp
+    gets.chomp.strip
   end
 
   def ask_p2_name
     puts 'Second player\'s name:'
-    gets.chomp
+    gets.chomp.strip
   end
 
   def ask_p1_symbol(name)
     puts "First player (#{name})'s symbol choice (x or o):"
-    input = gets.chomp.downcase
+    input = gets.chomp.strip.downcase
     until ['x', 'o'].include?(input)
       puts 'Invalid character! Please try again:'
-      input = gets.chomp.downcase
+      input = gets.chomp.strip.downcase
     end
+    input
   end
 end
