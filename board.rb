@@ -22,6 +22,13 @@ class Board
     @tile_states.flatten.all?(' ')
   end
 
+  def empty_at?(location)
+    row = LETTER_TO_NUM[location[0]]
+    col = location[1].to_i - 1
+
+    @tile_states[row][col] == ' '
+  end
+
   def draw(location, symbol)
     row = LETTER_TO_NUM[location[0]]
     col = location[1].to_i - 1

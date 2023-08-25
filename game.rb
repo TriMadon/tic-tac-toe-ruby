@@ -9,7 +9,6 @@ class Game
   def initialize
     p1_name = ask_p1_name
     p2_name = ask_p2_name
-
     p1_symbol = ask_p1_symbol(p1_name)
     p2_symbol = p1_symbol == 'o' ? 'x' : 'o'
     puts "Second player (#{p2_name}) was assigned #{p2_symbol}!"
@@ -18,9 +17,7 @@ class Game
     @p2 = Player.new(p2_name, p2_symbol)
 
     @board = Board.new
-
     @active_player = @p1.symbol == 'x' ? @p1 : @p2
-
     @game_is_done = false
 
     enter_game_loop
@@ -75,9 +72,8 @@ class Game
   def ask_location
     regex = /[a-c][1-3]/
     loc = gets.chomp.gsub(/[[:space:]]/, '').downcase
-    until loc.length == 2 && regex =~ loc
-      puts 'Invalid input! make sure your input is in <a-c><1-3> format (e.g., a3, b2, c2...)'
-      puts 'Try again:'
+    until loc.length == 2 && regex =~ loc && @board.empty_at?(loc)
+      puts 'Inavlid input! Try again:'
       loc = gets.chomp.gsub(/[[:space:]]/, '').downcase
     end
     loc
