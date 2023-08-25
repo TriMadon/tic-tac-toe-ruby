@@ -4,7 +4,7 @@ require './player'
 require './board'
 
 class Game
-  attr_accessor :p1, :p2, :board
+  attr_accessor :p1, :p2, :active_player, :game_is_done, :board
 
   def initialize
     p1_name = ask_p1_name
@@ -18,6 +18,32 @@ class Game
     @p2 = Player.new(p2_name, p2_symbol)
 
     @board = Board.new
+
+    @active_player = @p1.symbol == 'x' ? @p1 : @p2
+
+    @game_is_done = false
+
+    enter_game_loop
+  end
+
+  def enter_game_loop
+    until game_is_done
+      play_round(@active_player)
+      switch_players
+    end
+  end
+
+  def play_round(player)
+    @board.print_board
+
+    if @board.empty?
+      puts "#{player.name} (x) begins first:"
+    else
+      puts "#{player.name}'s (#{player.symbol}) turn:"
+    end
+
+    location = ask_location
+    @board.draw(location, player.symbol)
   end
 
   private
@@ -40,5 +66,20 @@ class Game
       choice = gets.chomp.strip.downcase
     end
     choice
+  end
+
+  def switch_players
+    @active_player = @active_player == @p1 ? @p2 : @p1
+  end
+
+  def ask_location
+    regex = /[a-c][1-3]/
+    loc = gets.chomp.gsub(/[[:space:]]/, '').downcase
+    until loc.length == 2 && regex =~ loc
+      puts 'Invalid input! make sure your input is in <a-c><1-3> format (e.g., a3, b2, c2...)'
+      puts 'Try again:'
+      loc = gets.chomp.gsub(/[[:space:]]/, '').downcase
+    end
+    loc
   end
 end
