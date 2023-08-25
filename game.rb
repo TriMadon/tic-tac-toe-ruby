@@ -1,7 +1,10 @@
+# frozen_string_literal: true
+
 require './player'
+require './board'
 
 class Game
-  attr_accessor :p1, :p2
+  attr_accessor :p1, :p2, :board
 
   def initialize
     p1_name = ask_p1_name
@@ -13,7 +16,11 @@ class Game
 
     @p1 = Player.new(p1_name, p1_symbol)
     @p2 = Player.new(p2_name, p2_symbol)
+
+    @board = Board.new
   end
+
+  private
 
   def ask_p1_name
     puts 'First player\'s name:'
@@ -27,11 +34,11 @@ class Game
 
   def ask_p1_symbol(name)
     puts "First player (#{name})'s symbol choice (x or o):"
-    input = gets.chomp.strip.downcase
-    until ['x', 'o'].include?(input)
+    choice = gets.chomp.strip.downcase
+    until ['x', 'o'].include?(choice)
       puts 'Invalid character! Please try again:'
-      input = gets.chomp.strip.downcase
+      choice = gets.chomp.strip.downcase
     end
-    input
+    choice
   end
 end
