@@ -4,11 +4,10 @@ class Player
   attr_accessor :symbol
   attr_reader :name
 
-  def initialize(name, symbol, board)
+  def initialize(name, board)
     @name = name
-    @symbol = symbol
     @board = board
-    @free_lines = 0
+    @symbol = nil
     @num_of_draws = 0
   end
 
@@ -23,5 +22,9 @@ class Player
 
   def full_line?
     @board.full_symbol_line?(@symbol)
+  end
+
+  def clear_stats
+    @num_of_draws = 0
   end
 end

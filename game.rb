@@ -13,16 +13,17 @@ class Game
   attr_accessor :p1, :p2, :active_player, :game_state, :board, :winner
 
   def initialize
-    p1_name = ask_p1_name
-    p2_name = ask_p2_name
-    p1_symbol = ask_p1_symbol(p1_name)
-    p2_symbol = p1_symbol == 'o' ? 'x' : 'o'
-    puts "Second player (#{p2_name}) was assigned #{p2_symbol}!"
-
     @board = Board.new
 
-    @p1 = Player.new(p1_name, p1_symbol, board)
-    @p2 = Player.new(p2_name, p2_symbol, board)
+    p1_name = ask_p1_name
+    p2_name = ask_p2_name
+
+    @p1 = Player.new(p1_name, board)
+    @p2 = Player.new(p2_name, board)
+
+    @p1.symbol = ask_p1_symbol
+    @p2.symbol = @p1.symbol == 'o' ? 'x' : 'o'
+    puts "Second player (#{@p2.name}) was assigned #{@p2.symbol}!"
 
     @active_player = @p1.symbol == 'x' ? @p1 : @p2
     @game_state = GameState::IN_PROGRESS
@@ -40,6 +41,8 @@ class Game
 
     announce_winner if @game_state == GameState::WIN
     announce_draw if @game_state == GameState::DRAW
+
+    ask_try_again
   end
 
   def play_round(player)
@@ -67,8 +70,8 @@ class Game
     gets.chomp.strip
   end
 
-  def ask_p1_symbol(name)
-    puts "First player (#{name})'s symbol choice (x or o):"
+  def ask_p1_symbol
+    puts "First player (#{@p1.name})'s symbol choice (x or o):"
     choice = gets.chomp.strip.downcase
     until ['x', 'o'].include?(choice)
       puts 'Invalid character! Please try again:'
@@ -114,5 +117,20 @@ class Game
 
   def announce_draw
     puts 'No winner! This is a draw.'
+  end
+
+  def ask_try_again
+    puts 'Try again? press \'y\' to continue'
+    return unless gets.chomp.gsub(/[[:space:]]/, '').downcase == 'y'
+
+    @p1.symbol = ask_p1_symbol
+    @p2.symbol = @p1.symbol == 'o' ? 'x' : 'o'
+    @p1.clear_stats
+    @p2.clear_stats
+    board.clear
+    @game_state = GameState::IN_PROGRESS
+    @winner = nil
+    @active_player = @p1.symbol == 'x' ? @p1 : @p2
+    enter_game_loop
   end
 end

@@ -49,6 +49,10 @@ class Board
     false
   end
 
+  def clear
+    @tile_states = Array.new(3) { Array.new(3, ' ') }
+  end
+
   private
 
   def print_row(row)
