@@ -4,7 +4,13 @@ require './player'
 require './board'
 
 class Game
-  attr_accessor :p1, :p2, :active_player, :game_is_done, :board
+  class GameState
+    DRAW = :draw
+    WIN = :win
+    IN_PROGRESS = :in_progress
+  end
+
+  attr_accessor :p1, :p2, :active_player, :game_state, :board, :winner
 
   def initialize
     p1_name = ask_p1_name
@@ -13,21 +19,27 @@ class Game
     p2_symbol = p1_symbol == 'o' ? 'x' : 'o'
     puts "Second player (#{p2_name}) was assigned #{p2_symbol}!"
 
-    @p1 = Player.new(p1_name, p1_symbol)
-    @p2 = Player.new(p2_name, p2_symbol)
-
     @board = Board.new
+
+    @p1 = Player.new(p1_name, p1_symbol, board)
+    @p2 = Player.new(p2_name, p2_symbol, board)
+
     @active_player = @p1.symbol == 'x' ? @p1 : @p2
-    @game_is_done = false
+    @game_state = GameState::IN_PROGRESS
+    @winner = nil
 
     enter_game_loop
   end
 
   def enter_game_loop
-    until game_is_done
+    while @game_state == GameState::IN_PROGRESS
       play_round(@active_player)
       switch_players
+      detect_game_end
     end
+
+    announce_winner if @game_state == GameState::WIN
+    announce_draw if @game_state == GameState::DRAW
   end
 
   def play_round(player)
@@ -40,7 +52,7 @@ class Game
     end
 
     location = ask_location
-    @board.draw(location, player.symbol)
+    player.draw_symbol(location)
   end
 
   private
@@ -77,5 +89,30 @@ class Game
       loc = gets.chomp.gsub(/[[:space:]]/, '').downcase
     end
     loc
+  end
+
+  def detect_game_end
+    if @p1.in_stalemate? || @p2.in_stalemate?
+      end_game(GameState::DRAW)
+    elsif @p1.full_line?
+      end_game(GameState::WIN, @p1)
+    elsif @p2.full_line?
+      end_game(GameState::WIN, @p2)
+    end
+  end
+
+  def end_game(state, winner = nil)
+    @board.print_board
+    puts 'Game has ended.'
+    @game_state = state
+    @winner = winner
+  end
+
+  def announce_winner
+    puts "The winner is #{@winner.name}. Congratulations!"
+  end
+
+  def announce_draw
+    puts 'No winner! This is a draw.'
   end
 end

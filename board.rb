@@ -36,9 +36,42 @@ class Board
     @tile_states[row][col] = symbol.upcase
   end
 
+  def full_symbol_line?(sym)
+    sym = sym.upcase
+
+    3.times do |i|
+      return true if filled_with_symbol?(row(i), sym)
+      return true if filled_with_symbol?(column(i), sym)
+    end
+    return true if filled_with_symbol?(main_diagonal, sym)
+    return true if filled_with_symbol?(counter_diagonal, sym)
+
+    false
+  end
+
   private
 
   def print_row(row)
     "|#{row.reduce('') { |res, sym| res + " #{sym} |" }}"
+  end
+
+  def filled_with_symbol?(arr, sym)
+    arr.all?(sym)
+  end
+
+  def row(index)
+    @tile_states[index]
+  end
+
+  def column(index)
+    @tile_states.map { |row| row[index] }
+  end
+
+  def main_diagonal
+    @tile_states.each_with_index.map { |row, index| row[index] }
+  end
+
+  def counter_diagonal
+    @tile_states.each_with_index.map { |row, index| row[2 - index] }
   end
 end
