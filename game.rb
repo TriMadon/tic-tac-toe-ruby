@@ -4,6 +4,7 @@ require './player'
 require './board'
 
 class Game
+  PLAYER_SYMBOLS = ['x', 'o'].freeze
   class GameState
     DRAW = :draw
     WIN = :win
@@ -21,15 +22,21 @@ class Game
     @p1 = Player.new(p1_name, board)
     @p2 = Player.new(p2_name, board)
 
-    @p1.symbol = ask_p1_symbol
-    @p2.symbol = @p1.symbol == 'o' ? 'x' : 'o'
-    puts "Second player (#{@p2.name}) was assigned #{@p2.symbol}!"
+    initialize_players
+  end
 
-    @active_player = @p1.symbol == 'x' ? @p1 : @p2
-    @game_state = GameState::IN_PROGRESS
-    @winner = nil
-
+  def start_game
     enter_game_loop
+  end
+
+  private
+
+  def initialize_players
+    @p1.symbol = ask_for_symbol(@p1.name)
+    @p2.symbol = @p1.symbol == PLAYER_SYMBOLS.first ? PLAYER_SYMBOLS.last : PLAYER_SYMBOLS.first
+    puts "Second player (#{@p2.name}) was assigned #{@p2.symbol}!"
+    @active_player = @p1.symbol == PLAYER_SYMBOLS.first ? @p1 : @p2
+    @game_state = GameState::IN_PROGRESS
   end
 
   def enter_game_loop
@@ -46,7 +53,9 @@ class Game
   end
 
   def play_round(player)
+    puts ''
     @board.print_board
+    puts ''
 
     if @board.empty?
       puts "#{player.name} (x) begins first:"
@@ -58,8 +67,6 @@ class Game
     player.draw_symbol(location)
   end
 
-  private
-
   def ask_p1_name
     puts 'First player\'s name:'
     gets.chomp.strip
@@ -70,10 +77,10 @@ class Game
     gets.chomp.strip
   end
 
-  def ask_p1_symbol
-    puts "First player (#{@p1.name})'s symbol choice (x or o):"
+  def ask_for_symbol(player_name)
+    puts "#{player_name}'s symbol choice #{PLAYER_SYMBOLS.join(' or ')}:"
     choice = gets.chomp.strip.downcase
-    until ['x', 'o'].include?(choice)
+    until PLAYER_SYMBOLS.include?(choice)
       puts 'Invalid character! Please try again:'
       choice = gets.chomp.strip.downcase
     end
@@ -95,13 +102,19 @@ class Game
   end
 
   def detect_game_end
-    if @p1.in_stalemate? || @p2.in_stalemate?
+    if stalemate?(@p1) || stalemate?(@p2)
       end_game(GameState::DRAW)
-    elsif @p1.full_line?
-      end_game(GameState::WIN, @p1)
-    elsif @p2.full_line?
-      end_game(GameState::WIN, @p2)
+    elsif player_has_full_line?(@p1) || player_has_full_line?(@p2)
+      end_game(GameState::WIN, @p1.full_line? ? @p1 : @p2)
     end
+  end
+
+  def player_has_full_line?(player)
+    player.full_line?
+  end
+
+  def stalemate?(player)
+    player.in_stalemate?
   end
 
   def end_game(state, winner = nil)
@@ -120,17 +133,15 @@ class Game
   end
 
   def ask_try_again
-    puts 'Try again? press \'y\' to continue'
+    sleep 1
+    puts ''
+    puts 'Try again? press \'y\' to accept:'
     return unless gets.chomp.gsub(/[[:space:]]/, '').downcase == 'y'
 
-    @p1.symbol = ask_p1_symbol
-    @p2.symbol = @p1.symbol == 'o' ? 'x' : 'o'
+    board.clear
     @p1.clear_stats
     @p2.clear_stats
-    board.clear
-    @game_state = GameState::IN_PROGRESS
-    @winner = nil
-    @active_player = @p1.symbol == 'x' ? @p1 : @p2
+    initialize_players
     enter_game_loop
   end
 end
