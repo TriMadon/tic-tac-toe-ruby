@@ -1,6 +1,6 @@
 # frozen_string_literal: true
 
-require './game'
+require './tic_tac_toe'
 
-game = Game.new
+game = TicTacToe::Game.new
 game.start_game
